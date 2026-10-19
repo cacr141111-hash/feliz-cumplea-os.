@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10152f">
+  <meta name="description" content="¡Tu aventura de cumpleaños, llena de diamantes, TNT y pastel pixelado!">
+  <title>¡Nivel 5 desbloqueado!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --grass: #55ff55;
+      --diamond: #00ffff;
+      --gold: #ffaa00;
+      --tnt: #ff3333;
+      --portal: #aa00aa;
+      --ink: #11152b;
+      --panel: rgba(20, 28, 59, .88);
+      --white: #fffdf5;
+      --pixel: "Press Start 2P", monospace;
+      --round: "Fredoka", "Trebuchet MS", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--white);
+      font-family: var(--round);
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(89, 46, 170, .38), transparent 46rem),
+        linear-gradient(180deg, #11152f 0%, #161f46 60%, #10182e 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      opacity: .28;
+      pointer-events: none;
+      background-image: radial-gradient(#fff 1px, transparent 1.5px);
+      background-size: 42px 42px;
+      animation: star-drift 16s linear infinite;
+    }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+
+    .pixel-title {
+      font-family: var(--pixel);
+      line-height: 1.65;
+      text-shadow: 3px 4px 0 #342461, 0 0 18px rgba(0, 255, 255, .42);
+    }
+
+    .eyebrow {
+      margin: 0 0 .8rem;
+      color: var(--diamond);
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .screen {
+      position: fixed;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      inset: 0;
+      padding: 1rem;
+      overflow-y: auto;
+      background:
+        radial-gradient(ellipse at center, rgba(101, 27, 154, .45), transparent 55%),
+        #10152f;
+      transition: opacity .65s ease, visibility .65s ease, transform .65s ease;
+    }
+
+    .screen.is-hidden {
+      visibility: hidden;
+      opacity: 0;
+      transform: scale(.96);
+      pointer-events: none;
+    }
+
+    .welcome {
+      width: min(100%, 780px);
+      padding: clamp(1rem, 4vw, 2.2rem);
+      text-align: center;
+      animation: floating 4s ease-in-out infinite;
+    }
+
+    .welcome h1 {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(1.15rem, 5.2vw, 2.8rem);
+      animation: pulse-glow 2.2s ease-in-out infinite;
+    }
+
+    .welcome h2 {
+      margin: 1rem 0 .5rem;
+      color: var(--grass);
+      font-size: clamp(1.2rem, 5vw, 2.4rem);
+      text-shadow: 0 0 18px rgba(85, 255, 85, .55);
+    }
+
+    .welcome-copy {
+      margin: .4rem 0 1rem;
+      font-size: clamp(1rem, 3vw, 1.3rem);
+    }
+
+    .avatar-wrap { position: relative; width: fit-content; margin: 1rem auto; }
+
+    .speech {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: calc(100% - .5rem);
+      width: max-content;
+      max-width: min(220px, 48vw);
+      padding: .7rem .9rem;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      color: var(--ink);
+      background: #fff;
+      box-shadow: 4px 5px 0 rgba(0, 0, 0, .3);
+      font-size: .95rem;
+      font-weight: 700;
+      transform: rotate(3deg);
+    }
+
+    .speech::after {
+      position: absolute;
+      bottom: -10px;
+      left: 16px;
+      width: 15px;
+      height: 15px;
+      content: "";
+      border-right: 3px solid var(--ink);
+      border-bottom: 3px solid var(--ink);
+      background: #fff;
+      transform: rotate(45deg);
+    }
+
+    .avatar {
+      display: grid;
+      width: 112px;
+      height: 112px;
+      place-items: center;
+      padding: 0;
+      border: 5px solid #fff;
+      border-radius: 25px;
+      color: inherit;
+      background: linear-gradient(140deg, #32c9ff, #733bdb 65%, #ff57b9);
+      box-shadow: 0 10px 0 #35265e, 0 0 28px rgba(0, 255, 255, .6);
+      cursor: pointer;
+      animation: floating 2.4s ease-in-out infinite;
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .avatar-face { font-size: 4.5rem; line-height: 1; }
+    .avatar:hover, .avatar:active { animation: pixel-bounce .38s ease; }
+    .avatar.is-flipping { animation: avatar-flip .7s ease; }
+
+    .pixel-button {
+      position: relative;
+      display: inline-flex;
+      min-height: 54px;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      padding: .9rem 1.2rem;
+      border: 3px solid #fff;
+      border-radius: 14px;
+      color: #18203a;
+      background: var(--grass);
+      box-shadow: 0 7px 0 #238b3b, 0 0 26px rgba(85, 255, 85, .42);
+      font-size: clamp(.9rem, 2.6vw, 1.18rem);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    .pixel-button:hover { transform: translateY(-3px) scale(1.035); }
+    .pixel-button:active { transform: translateY(4px) scale(.97); box-shadow: 0 2px 0 #238b3b; }
+
+    .portal-flash {
+      position: fixed;
+      z-index: 30;
+      inset: 0;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      background: radial-gradient(circle, #ff52e5 0%, #7026d2 26%, #160e2e 62%);
+    }
+
+    .portal-flash.is-active { visibility: visible; animation: portal-open .9s ease-in forwards; }
+
+    .confetti-layer {
+      position: fixed;
+      z-index: 0;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .background-block {
+      position: absolute;
+      top: -10vh;
+      width: 12px;
+      height: 12px;
+      opacity: .28;
+      box-shadow: 0 0 12px currentColor;
+      animation: confeti-fall var(--fall-time, 17s) linear var(--fall-delay, 0s) infinite;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      width: min(100% - 1.2rem, 1040px);
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .65s ease .25s, transform .65s ease .25s;
+    }
+
+    main.is-visible { opacity: 1; transform: none; }
+
+    .hero {
+      position: relative;
+      padding: clamp(1rem, 4vw, 2.2rem);
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: .2rem 0;
+      color: var(--gold);
+      font-size: clamp(1.2rem, 4vw, 2rem);
+    }
+
+    .hero h2 { margin: .4rem 0; color: var(--grass); font-size: clamp(1.6rem, 6vw, 3.3rem); }
+    .hero p { font-size: 1.15rem; }
+
+    .hud {
+      position: sticky;
+      z-index: 5;
+      top: .5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .55rem;
+      margin: .5rem 0 1.25rem;
+      padding: .7rem;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 18px;
+      background: rgba(12, 17, 40, .82);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, .25);
+      backdrop-filter: blur(12px);
+    }
+
+    .hud-chip {
+      padding: .55rem .75rem;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 999px;
+      color: var(--white);
+      background: #20294d;
+      font-weight: 700;
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    .hud-chip:nth-child(2) { animation-delay: -.8s; }
+    .hud-chip:nth-child(3) { animation-delay: -1.5s; }
+    .hud-chip strong { color: var(--diamond); }
+
+    .game-card {
+      margin: 1.2rem 0;
+      padding: clamp(1rem, 4vw, 2rem);
+      border: 2px solid rgba(255, 255, 255, .17);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, .23);
+      animation: floating 6s ease-in-out infinite;
+    }
+
+    .game-card:nth-of-type(2) { animation-delay: -1.4s; }
+    .game-card:nth-of-type(3) { animation-delay: -2.8s; }
+    .game-card h2 { margin: 0 0 .6rem; font-size: clamp(1.35rem, 4vw, 2rem); }
+    .game-card > p { margin: .3rem 0 1rem; color: #e0e8ff; font-size: 1.05rem; }
+    .mining-card { border-color: rgba(0, 255, 255, .48); }
+    .tnt-card { border-color: rgba(255, 51, 51, .5); }
+    .cake-card { border-color: rgba(255, 170, 0, .5); }
+
+    .mine-score {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: .5rem;
+      margin: .8rem 0;
+      font-size: clamp(1rem, 3vw, 1.3rem);
+      font-weight: 700;
+    }
+
+    .mine-score strong { color: var(--diamond); }
+    .mine-field {
+      position: relative;
+      display: grid;
+      min-height: 200px;
+      grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+      align-content: center;
+      justify-items: center;
+      gap: .6rem;
+      overflow: hidden;
+      padding: 1rem;
+      border: 2px dashed rgba(0, 255, 255, .42);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(22, 62, 92, .55), rgba(20, 36, 69, .8)),
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(104, 205, 255, .08) 32px),
+        repeating-linear-gradient(90deg, transparent 0 31px, rgba(104, 205, 255, .08) 32px);
+    }
+
+    .ore {
+      display: grid;
+      width: 70px;
+      height: 70px;
+      place-items: center;
+      border: 0;
+      border-radius: 18px;
+      background: rgba(10, 21, 48, .8);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .11), 0 6px 0 rgba(0, 0, 0, .22);
+      font-size: 2.5rem;
+      cursor: pointer;
+      animation: floating 1.6s ease-in-out infinite;
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .ore:nth-child(even) { animation-delay: -.7s; }
+    .ore[data-kind="robux"] { color: var(--gold); font-family: var(--pixel); font-size: 1.1rem; text-shadow: 0 0 10px rgba(255, 170, 0, .7); }
+    .ore:hover, .ore:active { animation: pixel-bounce .35s ease; }
+    .ore.is-collected { animation: ore-burst .32s ease forwards; pointer-events: none; }
+
+    .pop-text {
+      position: absolute;
+      z-index: 2;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      pointer-events: none;
+      text-shadow: 0 2px 5px #151632, 0 0 10px var(--gold);
+      animation: fade-up .9s ease-out forwards;
+    }
+
+    .tnt-stage {
+      display: grid;
+      min-height: 220px;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 18px;
+      background: radial-gradient(circle, rgba(255, 71, 105, .2), transparent 70%);
+    }
+
+    .tnt-button {
+      width: 156px;
+      height: 132px;
+      border: 7px solid #fff;
+      border-radius: 12px;
+      color: #fff;
+      background: repeating-linear-gradient(0deg, #e82d39 0 17px, #fb4752 17px 34px);
+      box-shadow: 0 9px 0 #9b1828, 0 0 22px rgba(255, 51, 51, .5);
+      font-family: var(--pixel);
+      font-size: 1.7rem;
+      cursor: pointer;
+      animation: floating 2s ease-in-out infinite;
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .tnt-button:hover, .tnt-button:active { animation: pixel-bounce .35s ease; }
+    .tnt-button.is-counting { animation: tnt-flash var(--flash-speed, .65s) steps(2, end) infinite; }
+    .tnt-button.is-exploding { animation: tnt-explode .55s ease-out forwards; }
+    .tnt-button:disabled { cursor: default; }
+    .tnt-status { min-height: 1.6em; text-align: center; font-weight: 700; }
+
+    .party-mode {
+      background: linear-gradient(125deg, rgba(255, 42, 123, .25), rgba(35, 220, 255, .25), rgba(255, 190, 45, .25));
+      background-size: 300% 300%;
+      animation: party-lights 1.2s ease infinite;
+    }
+
+    .tnt-gift {
+      position: absolute;
+      z-index: 1;
+      font-size: 2rem;
+      pointer-events: none;
+      animation: gift-fly 1.8s ease-out forwards;
+    }
+
+    .cake-area { padding: 1rem 0 .4rem; text-align: center; }
+    .cake-scene { position: relative; width: min(100%, 420px); height: 246px; margin: 0 auto; }
+
+    .cake-body {
+      position: absolute;
+      right: 9%;
+      bottom: 18px;
+      left: 9%;
+      height: 130px;
+      border: 7px solid #f7d49b;
+      border-radius: 12px 12px 7px 7px;
+      background: repeating-linear-gradient(0deg, #af4fff 0 28px, #d178ff 28px 44px, #ffcf76 44px 58px);
+      box-shadow: 0 10px 0 #8f3e44, 0 16px 0 #56306c, 0 18px 15px rgba(0, 0, 0, .35);
+      image-rendering: pixelated;
+    }
+
+    .cake-body::before {
+      position: absolute;
+      top: -14px;
+      right: -7px;
+      left: -7px;
+      height: 26px;
+      content: "";
+      border: 5px solid #ffe7a5;
+      border-radius: 8px;
+      background: repeating-linear-gradient(90deg, #fff4ce 0 32px, #ffcf76 32px 39px);
+    }
+
+    .candle-row {
+      position: absolute;
+      z-index: 1;
+      right: 13%;
+      bottom: 151px;
+      left: 13%;
+      display: flex;
+      justify-content: space-around;
+      align-items: end;
+    }
+
+    .candle {
+      position: relative;
+      width: 24px;
+      height: 62px;
+      padding: 0;
+      border: 3px solid #fff1d2;
+      border-radius: 5px 5px 2px 2px;
+      background: repeating-linear-gradient(135deg, #22d4c1 0 9px, #ff5191 9px 18px);
+      box-shadow: 2px 3px 0 rgba(0, 0, 0, .25);
+      cursor: pointer;
+      animation: floating 2.2s ease-in-out infinite;
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .candle:nth-child(2) { animation-delay: -.3s; }
+    .candle:nth-child(3) { animation-delay: -.6s; }
+    .candle:nth-child(4) { animation-delay: -.9s; }
+    .candle:nth-child(5) { animation-delay: -1.2s; }
+    .candle:hover, .candle:active { animation: pixel-bounce .35s ease; }
+    .flame {
+      position: absolute;
+      top: -29px;
+      left: 50%;
+      width: 16px;
+      height: 24px;
+      border-radius: 60% 40% 55% 45%;
+      background: linear-gradient(180deg, #fffca5, #ffb522 54%, #ff5832);
+      box-shadow: 0 0 12px 5px rgba(255, 177, 43, .7);
+      transform: translateX(-50%) rotate(5deg);
+      animation: flame-dance .34s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    .candle.is-out { background: #696b80; cursor: default; }
+    .candle.is-out .flame { display: none; }
+    .smoke {
+      position: absolute;
+      top: -29px;
+      left: 50%;
+      opacity: 0;
+      font-size: 1.25rem;
+      pointer-events: none;
+    }
+
+    .candle.is-out .smoke { animation: smoke-rise 1s ease-out forwards; }
+    .cake-status { min-height: 1.6em; margin: .4rem 0; font-weight: 700; }
+
+    .supernova {
+      position: fixed;
+      z-index: 25;
+      display: grid;
+      place-items: center;
+      inset: 0;
+      padding: 1rem;
+      background: rgba(12, 15, 38, .94);
+      text-align: center;
+      animation: supernova-in .5s ease-out;
+    }
+
+    .supernova[hidden] { display: none; }
+    .supernova-card { width: min(100%, 700px); }
+    .supernova h2 { color: var(--gold); font-size: clamp(1.25rem, 5vw, 2.5rem); }
+    .supernova p { font-size: clamp(1.05rem, 3vw, 1.35rem); }
+
+    .reward-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .8rem; margin: 1rem 0 1.5rem; }
+    .reward-card {
+      padding: 1rem;
+      border: 2px solid rgba(255, 255, 255, .24);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(99, 54, 169, .7), rgba(31, 54, 101, .8));
+      animation: floating 2.8s ease-in-out infinite;
+    }
+
+    .reward-card:nth-child(2) { animation-delay: -.8s; }
+    .reward-card h3 { margin-top: 0; color: var(--diamond); }
+    .achievement {
+      position: fixed;
+      z-index: 24;
+      display: grid;
+      place-items: center;
+      inset: 0;
+      padding: 1rem;
+      background: rgba(10, 12, 30, .91);
+      text-align: center;
+      animation: supernova-in .35s ease-out;
+    }
+
+    .achievement[hidden] { display: none; }
+    .achievement-box { max-width: 680px; }
+    .achievement h2 { color: var(--gold); font-size: clamp(1.3rem, 5vw, 2.7rem); }
+    .achievement p { font-size: 1.2rem; }
+    .shake-screen { animation: shake-screen .42s linear; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+
+    @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 255, 255, .35)); } 50% { filter: drop-shadow(0 0 16px rgba(85, 255, 85, .8)); } }
+    @keyframes shake-screen { 0%, 100% { transform: translate(0); } 15% { transform: translate(-8px, 5px) rotate(-.5deg); } 30% { transform: translate(8px, -5px) rotate(.5deg); } 45% { transform: translate(-6px, -3px); } 60% { transform: translate(6px, 3px); } 75% { transform: translate(-3px, 2px); } }
+    @keyframes pixel-bounce { 0% { transform: scale(1); } 40% { transform: scale(1.14, .88); } 75% { transform: scale(.93, 1.1); } 100% { transform: scale(1); } }
+    @keyframes tnt-flash { 0%, 100% { background-color: #ff3333; filter: brightness(1.5); transform: scale(var(--tnt-scale, 1)); } 50% { background-color: #fff; filter: brightness(1); transform: scale(calc(var(--tnt-scale, 1) * .96)); } }
+    @keyframes confeti-fall { 0% { transform: translate3d(0, -12vh, 0) rotate(0); } 100% { transform: translate3d(36px, 110vh, 0) rotate(720deg); } }
+    @keyframes fade-up { from { opacity: 0; transform: translate(-50%, 8px) scale(.8); } 20% { opacity: 1; } to { opacity: 0; transform: translate(-50%, -75px) scale(1.1); } }
+    @keyframes star-drift { to { background-position: 42px 84px; } }
+    @keyframes avatar-flip { to { transform: rotate(360deg) scale(1.1); } }
+    @keyframes portal-open { 0% { opacity: 0; transform: scale(.05); } 45% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0; transform: scale(3); } }
+    @keyframes ore-burst { to { opacity: 0; transform: scale(1.5) rotate(18deg); } }
+    @keyframes tnt-explode { 0% { transform: scale(1.5); filter: brightness(3); } 55% { transform: scale(1.9); opacity: 1; } 100% { transform: scale(2.4); opacity: 0; } }
+    @keyframes party-lights { 0%, 100% { background-position: 0 50%; } 50% { background-position: 100% 50%; } }
+    @keyframes gift-fly { 0% { opacity: 0; transform: translate(0, 30px) rotate(0) scale(.5); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--drift, 24px), -180px) rotate(40deg) scale(1.3); } }
+    @keyframes flame-dance { from { transform: translateX(-50%) rotate(-7deg) scale(.92, 1); } to { transform: translateX(-50%) rotate(8deg) scale(1.08, .94); } }
+    @keyframes smoke-rise { 0% { opacity: 0; transform: translate(-50%, 8px) scale(.6); } 35% { opacity: .9; } 100% { opacity: 0; transform: translate(-20%, -34px) scale(1.3); } }
+    @keyframes supernova-in { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
+
+    @media (max-width: 520px) {
+      .speech { top: -1rem; left: 78%; }
+      .hud { gap: .35rem; padding: .55rem; }
+      .hud-chip { padding: .45rem .6rem; font-size: .92rem; }
+      .mine-field { min-height: 190px; }
+      .candle { width: 19px; height: 54px; }
+      .cake-scene { height: 226px; }
+      .cake-body { height: 116px; }
+      .candle-row { bottom: 135px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+  <div class="screen" id="welcome-screen" aria-labelledby="welcome-title">
+    <section class="welcome">
+      <p class="eyebrow">¡Una aventura arcade te espera!</p>
+      <h1 class="pixel-title" id="welcome-title">¡NIVEL 5 DESBLOQUEADO!</h1>
+      <h2 id="birthday-name">¡FELIZ CUMPLEAÑOS, CAMPEÓN!</h2>
+      <p class="welcome-copy">¡Prepara tus poderes de constructor, minero y superhéroe!</p>
+      <div class="avatar-wrap">
+        <div class="speech" id="speech" aria-live="polite">¡Hoy es tu día!</div>
+        <button class="avatar" id="avatar" type="button" aria-label="Haz clic para que tu avatar dé una vuelta">
+          <span class="avatar-face" aria-hidden="true">🧑‍🚀</span>
+        </button>
+      </div>
+      <button class="pixel-button" id="start-button" type="button">🎮 ¡PRESIONA PARA INICIAR LA AVENTURA!</button>
+      <p class="eyebrow" style="margin-top: 1.4rem">¡Toca, juega y celebra!</p>
+    </section>
+  </div>
+
+  <div class="portal-flash" id="portal-flash" aria-hidden="true"></div>
+
+  <main id="game" aria-label="Aventura de cumpleaños">
+    <header class="hero">
+      <p class="eyebrow">¡Bienvenido al mundo de bloques!</p>
+      <h1 class="pixel-title">¡NIVEL 6 DESBLOQUEADO!</h1>
+      <h2 id="hero-name">¡FELIZ CUMPLEAÑOS, AMIGO!</h2>
+      <p>¡Tres desafíos legendarios, una súper fiesta y un pastel para ti!</p>
+    </header>
+
+    <nav class="hud" aria-label="Marcador de la aventura">
+      <span class="hud-chip">💎 Diamantes: <strong id="diamond-counter">0</strong>/20</span>
+      <span class="hud-chip">🪙 Robux: <strong id="robux-counter">0</strong></span>
+      <span class="hud-chip">🕯️ Velas: <strong id="candle-counter">5</strong>/5</span>
+    </nav>
+
+    <section class="game-card mining-card" aria-labelledby="mining-title">
+      <p class="eyebrow">Minijuego 1 · ¡A picar!</p>
+      <h2 id="mining-title">💎 Minería frenética de diamantes</h2>
+      <p>¡Toca los diamantes y los Robux para recoger tesoros! Necesitas 20 diamantes para el gran logro.</p>
+      <div class="mine-score">
+        <span>DIAMANTES RECOLECTADOS: <strong id="diamond-score">0</strong></span>
+        <span>COMBO: <strong id="combo-score">0</strong> 🔥</span>
+      </div>
+      <div class="mine-field" id="mine-field" aria-label="Campo de minería: toca los tesoros">
+        <button class="ore" type="button" data-kind="diamond" aria-label="Recoger diamante">💎</button>
+        <button class="ore" type="button" data-kind="robux" aria-label="Recoger Robux">R$</button>
+        <button class="ore" type="button" data-kind="diamond" aria-label="Recoger diamante">💎</button>
+        <button class="ore" type="button" data-kind="diamond" aria-label="Recoger diamante">💎</button>
+        <button class="ore" type="button" data-kind="robux" aria-label="Recoger Robux">R$</button>
+        <button class="ore" type="button" data-kind="diamond" aria-label="Recoger diamante">💎</button>
+        <button class="ore" type="button" data-kind="diamond" aria-label="Recoger diamante">💎</button>
+        <button class="ore" type="button" data-kind="robux" aria-label="Recoger Robux">R$</button>
+      </div>
+      <p id="mining-message" class="visually-hidden" aria-live="polite">¡A minar tesoros!</p>
+    </section>
+
+    <section class="game-card tnt-card" aria-labelledby="tnt-title">
+      <p class="eyebrow">Minijuego 2 · ¡Toca con energía!</p>
+      <h2 id="tnt-title">🧨 Desafío TNT explosivo</h2>
+      <p>¡Toca el TNT 5 veces rápido para la sorpresa!</p>
+      <div class="tnt-stage" id="tnt-stage">
+        <button class="tnt-button" id="tnt-button" type="button" aria-label="TNT: 0 de 5 toques">TNT</button>
+      </div>
+      <p class="tnt-status" id="tnt-status" aria-live="polite">¡A la cuenta de tres! ¡Toca rápido!</p>
+    </section>
+
+    <section class="game-card cake-card" aria-labelledby="cake-title">
+      <p class="eyebrow">El gran final · ¡Pide un deseo!</p>
+      <h2 id="cake-title">🎂 Fiesta del pastel de bloques</h2>
+      <p>¡Toca cada una de las 5 velitas para apagarlas y activar la supernova!</p>
+      <div class="cake-area">
+        <div class="cake-scene" role="group" aria-label="Pastel pixelado con cinco velas encendidas">
+          <div class="candle-row" id="candle-row">
+            <button class="candle" type="button" aria-label="Apagar vela 1"><span class="flame" aria-hidden="true"></span><span class="smoke" aria-hidden="true">💨</span></button>
+            <button class="candle" type="button" aria-label="Apagar vela 2"><span class="flame" aria-hidden="true"></span><span class="smoke" aria-hidden="true">💨</span></button>
+            <button class="candle" type="button" aria-label="Apagar vela 3"><span class="flame" aria-hidden="true"></span><span class="smoke" aria-hidden="true">💨</span></button>
+            <button class="candle" type="button" aria-label="Apagar vela 4"><span class="flame" aria-hidden="true"></span><span class="smoke" aria-hidden="true">💨</span></button>
+            <button class="candle" type="button" aria-label="Apagar vela 5"><span class="flame" aria-hidden="true"></span><span class="smoke" aria-hidden="true">💨</span></button>
+          </div>
+          <div class="cake-body" aria-hidden="true"></div>
+        </div>
+        <p class="cake-status" id="cake-status" aria-live="polite">¡Pide un deseo cuando las cinco velas se apaguen!</p>
+      </div>
+    </section>
+    <footer class="hero"><p class="eyebrow">¡Eres el jugador más legendario!</p></footer>
+  </main>
+
+  <section class="achievement" id="achievement" role="dialog" aria-modal="true" aria-labelledby="achievement-title" hidden>
+    <div class="achievement-box">
+      <p class="eyebrow">🏆 ¡Misión cumplida!</p>
+      <h2 class="pixel-title" id="achievement-title">¡LOGRO DESBLOQUEADO: MINERO LEYENDA!</h2>
+      <p>¡20 diamantes! ¡Eres un minero legendario!</p>
+      <button class="pixel-button dismiss-achievement" type="button">¡SEGUIR JUGANDO! ⭐</button>
+    </div>
+  </section>
+
+  <section class="supernova" id="supernova" role="dialog" aria-modal="true" aria-labelledby="supernova-title" hidden>
+    <div class="supernova-card">
+      <p class="eyebrow">✨ ¡MODO SUPERNOVA ACTIVADO! ✨</p>
+      <h2 class="pixel-title" id="supernova-title">¡FELIZ CUMPLEAÑOS, Amigo!</h2>
+      <p>¡Que tu nuevo nivel esté lleno de aventuras increíbles!</p>
+      <div class="reward-grid">
+        <article class="reward-card">
+          <h3>🎮 De tu Amigo</h3>
+          <p>¡Eres un jugador increíble! Que hoy esté lleno de diversión, bloques y aventuras. ¡Sigue brillando, AMIGO!</p>
+        </article>
+        <article class="reward-card">
+          <h3>💖 De parte de tu Hermana</h3>
+          <p>¡Feliz cumpleaños, mi Hermano favorito! Te quiero muchísimo. Que todos tus sueños suban al nivel más alto.</p>
+        </article>
+      </div>
+      <button class="pixel-button" id="celebrate-again" type="button">🎉 ¡OTRA VEZ, FIESTA!</button>
+      <button class="pixel-button" id="close-supernova" type="button">VOLVER A LA FIESTA</button>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script>
+    (() => {
+      const birthdayName = "CAMPEÓN"; // Cambia este texto para personalizar el cumpleaños.
+      const collected = { diamonds: 0, robux: 0, candles: 0 };
+      let combo = 0;
+      let lastMineAt = 0;
+      let tntClicks = 0;
+      let tntResetTimer;
+      let achievementShown = false;
+      let supernovaShown = false;
+
+      const welcomeScreen = document.querySelector("#welcome-screen");
+      const startButton = document.querySelector("#start-button");
+      const portalFlash = document.querySelector("#portal-flash");
+      const game = document.querySelector("#game");
+      const avatar = document.querySelector("#avatar");
+      const speech = document.querySelector("#speech");
+      const mineField = document.querySelector("#mine-field");
+      const tntButton = document.querySelector("#tnt-button");
+      const tntStage = document.querySelector("#tnt-stage");
+      const tntStatus = document.querySelector("#tnt-status");
+      const achievement = document.querySelector("#achievement");
+      const supernova = document.querySelector("#supernova");
+      const candleRow = document.querySelector("#candle-row");
+      const cakeStatus = document.querySelector("#cake-status");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const confettiColors = ["#55ff55", "#00ffff", "#ffaa00", "#ff3333", "#aa00aa", "#ffffff"];
+
+      const confettiLayer = document.querySelector("#confetti-layer");
+      confettiColors.forEach((color, index) => {
+        for (let block = 0; block < 3; block += 1) {
+          const piece = document.createElement("span");
+          piece.className = "background-block";
+          piece.style.left = `${(index * 16 + block * 5 + Math.random() * 8) % 100}%`;
+          piece.style.color = color;
+          piece.style.backgroundColor = color;
+          piece.style.setProperty("--fall-time", `${14 + Math.random() * 16}s`);
+          piece.style.setProperty("--fall-delay", `${-Math.random() * 24}s`);
+          confettiLayer.append(piece);
+        }
+      });
+
+      document.querySelector("#birthday-name").textContent = `¡FELIZ CUMPLEAÑOS, ${birthdayName}!`;
+      document.querySelector("#hero-name").textContent = `¡FELIZ CUMPLEAÑOS, ${birthdayName}!`;
+      document.querySelector("#supernova-title").textContent = `¡FELIZ CUMPLEAÑOS, ${birthdayName}!`;
+
+      function launchConfetti(options = {}) {
+        if (typeof window.confetti !== "function" || reducedMotion.matches) return;
+        const shape = typeof window.confetti.shapeFromPath === "function"
+          ? window.confetti.shapeFromPath({ path: "M0 0h8v8H0z" })
+          : "square";
+        window.confetti({
+          particleCount: options.particleCount || 80,
+          spread: options.spread || 75,
+          startVelocity: options.startVelocity || 38,
+          origin: options.origin || { y: .65 },
+          colors: options.colors || confettiColors,
+          shapes: [shape, "circle"],
+          scalar: options.scalar || 1.15,
+          zIndex: 40
+        });
+      }
+
+      function celebrateBurst() {
+        launchConfetti({ particleCount: 120, spread: 95, origin: { y: .65 } });
+        window.setTimeout(() => launchConfetti({
+          particleCount: 70, spread: 115, startVelocity: 48,
+          colors: ["#fff1a8", "#ffaa00", "#ffffff"], origin: { y: .58 }
+        }), 180);
+        window.setTimeout(() => launchConfetti({
+          particleCount: 90, spread: 140, origin: { y: .72 },
+          colors: ["#55ff55", "#00ffff", "#aa00aa", "#ff3333"]
+        }), 420);
+      }
+
+      function shakeScreen() {
+        if (reducedMotion.matches) return;
+        document.body.classList.remove("shake-screen");
+        void document.body.offsetWidth;
+        document.body.classList.add("shake-screen");
+        window.setTimeout(() => document.body.classList.remove("shake-screen"), 450);
+      }
+
+      function playRewardSound() {
+        const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextConstructor) return;
+        const audio = new AudioContextConstructor();
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((frequency, index) => {
+          const start = audio.currentTime + index * .11;
+          const oscillator = audio.createOscillator();
+          const volume = audio.createGain();
+          oscillator.type = "sine";
+          oscillator.frequency.value = frequency;
+          volume.gain.setValueAtTime(.0001, start);
+          volume.gain.exponentialRampToValueAtTime(.12, start + .025);
+          volume.gain.exponentialRampToValueAtTime(.0001, start + .2);
+          oscillator.connect(volume);
+          volume.connect(audio.destination);
+          oscillator.start(start);
+          oscillator.stop(start + .21);
+        });
+        window.setTimeout(() => audio.close(), 850);
+      }
+
+      function showPop(text, target) {
+        const fieldRect = mineField.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const pop = document.createElement("span");
+        pop.className = "pop-text";
+        pop.setAttribute("aria-hidden", "true");
+        pop.textContent = text;
+        pop.style.left = `${targetRect.left - fieldRect.left + targetRect.width / 2}px`;
+        pop.style.top = `${targetRect.top - fieldRect.top + 10}px`;
+        mineField.append(pop);
+        window.setTimeout(() => pop.remove(), 950);
+      }
+
+      function spawnOre(kind) {
+        const ore = document.createElement("button");
+        ore.type = "button";
+        ore.className = "ore";
+        ore.dataset.kind = kind;
+        ore.textContent = kind === "diamond" ? "💎" : "R$";
+        ore.setAttribute("aria-label", kind === "diamond" ? "Recoger diamante" : "Recoger Robux");
+        mineField.append(ore);
+      }
+
+      startButton.addEventListener("click", () => {
+        startButton.disabled = true;
+        portalFlash.classList.add("is-active");
+        window.setTimeout(() => {
+          welcomeScreen.classList.add("is-hidden");
+          game.classList.add("is-visible");
+          game.setAttribute("tabindex", "-1");
+          game.focus({ preventScroll: true });
+        }, 380);
+      });
+      portalFlash.addEventListener("animationend", () => portalFlash.classList.remove("is-active"));
+
+      const avatarLines = ["¡Oof! ¡Eres un pro!", "¡Hoy es tu día!", "¡Mina más diamantes!", "¡Vamos, constructor!"];
+      let avatarLine = 0;
+      avatar.addEventListener("click", () => {
+        avatar.classList.remove("is-flipping");
+        void avatar.offsetWidth;
+        avatar.classList.add("is-flipping");
+        speech.textContent = avatarLines[avatarLine % avatarLines.length];
+        avatarLine += 1;
+      });
+      avatar.addEventListener("animationend", () => avatar.classList.remove("is-flipping"));
+
+      mineField.addEventListener("click", (event) => {
+        const ore = event.target.closest("button.ore");
+        if (!ore || ore.classList.contains("is-collected")) return;
+        const isDiamond = ore.dataset.kind === "diamond";
+        if (isDiamond && collected.diamonds >= 20) {
+          ore.classList.add("is-collected");
+          window.setTimeout(() => ore.remove(), 350);
+          spawnOre("robux");
+          return;
+        }
+        ore.classList.add("is-collected");
+        showPop(isDiamond ? (combo >= 2 ? "¡C-C-COMBO! +100 XP" : "+100 XP") : "+50 XP", ore);
+        if (isDiamond) {
+          collected.diamonds += 1;
+          const now = Date.now();
+          combo = now - lastMineAt < 1300 ? combo + 1 : 1;
+          lastMineAt = now;
+          document.querySelector("#diamond-counter").textContent = collected.diamonds;
+          document.querySelector("#diamond-score").textContent = collected.diamonds;
+          document.querySelector("#combo-score").textContent = combo;
+          document.querySelector("#mining-message").textContent = `¡Diamante! ${collected.diamonds} de 20.`;
+        } else {
+          collected.robux += 1;
+          document.querySelector("#robux-counter").textContent = collected.robux;
+          document.querySelector("#mining-message").textContent = `¡Robux recogido! Tienes ${collected.robux}.`;
+        }
+        window.setTimeout(() => {
+          ore.remove();
+          spawnOre(collected.diamonds >= 20 ? "robux" : "diamond");
+        }, 300);
+        if (collected.diamonds === 20 && !achievementShown) {
+          achievementShown = true;
+          achievement.hidden = false;
+          document.querySelector(".dismiss-achievement").focus();
+          shakeScreen();
+          playRewardSound();
+          celebrateBurst();
+        }
+      });
+
+      document.querySelector(".dismiss-achievement").addEventListener("click", () => {
+        achievement.hidden = true;
+        document.querySelector("#mining-title").setAttribute("tabindex", "-1");
+        document.querySelector("#mining-title").focus();
+      });
+
+      function resetTnt() {
+        tntClicks = 0;
+        tntButton.classList.remove("is-counting");
+        tntButton.style.removeProperty("--tnt-scale");
+        tntButton.style.removeProperty("--flash-speed");
+        tntButton.setAttribute("aria-label", "TNT: 0 de 5 toques");
+        tntStatus.textContent = "¡A la cuenta de tres! ¡Toca rápido!";
+      }
+
+      function releaseGifts() {
+        tntStage.classList.add("party-mode");
+        for (let index = 0; index < 16; index += 1) {
+          const gift = document.createElement("span");
+          gift.className = "tnt-gift";
+          gift.setAttribute("aria-hidden", "true");
+          gift.textContent = ["🎁", "⭐", "🎈", "🪙"][index % 4];
+          gift.style.left = `${8 + Math.random() * 84}%`;
+          gift.style.top = `${55 + Math.random() * 35}%`;
+          gift.style.setProperty("--drift", `${Math.round(Math.random() * 140 - 70)}px`);
+          tntStage.append(gift);
+          window.setTimeout(() => gift.remove(), 1900);
+        }
+        window.setTimeout(() => tntStage.classList.remove("party-mode"), 3200);
+      }
+
+      tntButton.addEventListener("click", () => {
+        if (tntButton.disabled) return;
+        window.clearTimeout(tntResetTimer);
+        tntClicks += 1;
+        tntButton.classList.add("is-counting");
+        tntButton.style.setProperty("--tnt-scale", String(1 + tntClicks * .09));
+        tntButton.style.setProperty("--flash-speed", `${Math.max(.14, .72 - tntClicks * .11)}s`);
+        tntButton.setAttribute("aria-label", `TNT: ${tntClicks} de 5 toques`);
+        tntStatus.textContent = `¡${tntClicks} de 5! ¡Sigue, sigue!`;
+        if (tntClicks === 5) {
+          tntButton.disabled = true;
+          tntButton.classList.remove("is-counting");
+          tntButton.classList.add("is-exploding");
+          tntStatus.textContent = "💥 ¡BOOM! ¡Sorpresa de cumpleaños!";
+          shakeScreen();
+          releaseGifts();
+          celebrateBurst();
+          return;
+        }
+        tntResetTimer = window.setTimeout(() => {
+          if (tntClicks > 0) {
+            resetTnt();
+            tntStatus.textContent = "¡Uy! ¡Toca otra vez rapidísimo!";
+          }
+        }, 2300);
+      });
+
+      candleRow.addEventListener("click", (event) => {
+        const candle = event.target.closest("button.candle");
+        if (!candle || candle.classList.contains("is-out")) return;
+        candle.classList.add("is-out");
+        candle.setAttribute("aria-label", "Vela apagada");
+        collected.candles += 1;
+        document.querySelector("#candle-counter").textContent = 5 - collected.candles;
+        cakeStatus.textContent = collected.candles === 5
+          ? "¡Deseo pedido! ¡MODO SUPERNOVA ACTIVADO!"
+          : `¡${5 - collected.candles} velitas más! ¡Pide un deseo!`;
+        if (collected.candles === 5 && !supernovaShown) {
+          supernovaShown = true;
+          supernova.hidden = false;
+          document.querySelector("#celebrate-again").focus();
+          document.body.classList.add("party-mode");
+          shakeScreen();
+          playRewardSound();
+          celebrateBurst();
+        }
+      });
+
+      document.querySelector("#celebrate-again").addEventListener("click", () => {
+        celebrateBurst();
+        shakeScreen();
+      });
+
+      document.querySelector("#close-supernova").addEventListener("click", () => {
+        supernova.hidden = true;
+        document.querySelector("#cake-title").setAttribute("tabindex", "-1");
+        document.querySelector("#cake-title").focus();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !achievement.hidden) {
+          achievement.hidden = true;
+          document.querySelector("#mining-title").focus();
+        }
+        if (event.key === "Escape" && !supernova.hidden) {
+          supernova.hidden = true;
+          document.querySelector("#cake-title").focus();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
